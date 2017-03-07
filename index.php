@@ -3,25 +3,22 @@
 require "settings.php";
 require "ftp.php";
 
-//更新用の設定
-function updateOutput(){
-	flush();
-	ob_end_flush();
-	ob_start();
-}
-
-ob_start();
+//一時間までの実行を許可
+ini_set("max_execution_time",3600);
 
 //FTPクライアント呼び出し
 $ftp = new FtpTransmission();
 
 //ファイルのダウンロード
-if($ftp->connect($host, $user, $pass)){
-	$cue = getDownloadList("/",$ftp,$saveDir);
+if($ftp->connect(HOST, USER, PASS)){
+	$cue = getDownloadList("/",$ftp,SAVEDIR);
 	var_dump($cue);
+// 	foreach ($cue as $from){
+// 		$ftp->download($from,SAVEDIR);
+// 	}
 	$ftp->close();
 }
-//ファイルからリストを作成
+//ファイルからポッドキャスト用リストを作成
 
 
 //xmlとして保存
@@ -32,7 +29,6 @@ function getDownloadList($path,$client,$store){
 	$dirInfo = $client->rawlist($path);
 	static $dlCue = array();
 	foreach ($dirInfo as $fileInfo){
-		updateOutput();
 		echo $fileInfo['name']."(".$fileInfo['type'].")\n";
 		if($fileInfo['type'] == 'directory'){
 			//ディレクトリなら再帰
