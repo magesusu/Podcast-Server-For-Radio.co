@@ -13,9 +13,9 @@ $ftp = new FtpTransmission();
 if($ftp->connect(HOST, USER, PASS)){
 	$cue = getDownloadList("/",$ftp,SAVEDIR);
 	var_dump($cue);
-// 	foreach ($cue as $from){
-// 		$ftp->download($from,SAVEDIR);
-// 	}
+	foreach ($cue as $from){
+		$ftp->download($from,SAVEDIR);
+	}
 	$ftp->close();
 }
 //ファイルからポッドキャスト用リストを作成
