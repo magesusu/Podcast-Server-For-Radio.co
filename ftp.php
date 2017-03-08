@@ -7,10 +7,12 @@ class FtpTransmission {
 	//接続処理
 	function connect($host, $user, $pass, $port=21, $timeout=90){
 		try {
-			$this->conn = @ftp_connect($host, $port, $timeout);
+			$this->conn = ftp_connect($host, $port, $timeout);
 			if(!$this->conn) throw new Exception('FTP CONNECTION FAILED');
-			$result = @ftp_login($this->conn, $user, $pass);
+			$result = ftp_login($this->conn, $user, $pass);
 			if(!$result) throw new Exception('AUTHENTICATION FAILED');
+			var_dump($result);
+			ftp_pasv($this->conn, true);
 		} catch (Exception $e){
 			echo $e->getMessage();
 			return false;

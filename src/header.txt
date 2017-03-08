@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:itunes="http://www.itunes.com/DTDs/Podcast-1.0.dtd" version="2.0">
+<channel>
+<title>Sound Street Radio</title>
+<itunes:author>SSR990 DJ's</itunes:author>
+<link>http://soundstreetradio.com/</link>
+<itunes:subtitle>Music For Your Ears</itunes:subtitle>
+
+<itunes:summary>サウンド・ストリートは世界中のロック、ポップス、ヒップホップ、そしてレゲエの音楽を、日本をベースに活動するDJによって日本語と英語でお届けします。</itunes:summary>
+<description></description>
+<language>ja</language>
+<copyright>SSR990</copyright>
+<category>Music</category> 
+<itunes:category text="Music"/>
+<itunes:explicit>no</itunes:explicit>
+<itunes:owner>
+<itunes:name>SSR990</itunes:name>
+</itunes:owner>
+<itunes:image href="http://soundstreetradio.com/wp-content/uploads/2016/12/itunes_logo.jpg" />
