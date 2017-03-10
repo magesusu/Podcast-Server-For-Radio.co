@@ -4,7 +4,28 @@ require 'settings.php';
 
 //Original: http://mio-koduki.blogspot.jp/2012/08/phpcurl-phpcurlgoogle.html
 //TODO: 名前をgetにし、タグから計算した名前・写真や音楽のプレビューに関するデータが入った配列を返すように改善
-function printRadioCoTrackInformation(){
+
+function parseTrack(){
+	$json = getRadioCoTrackInformation();
+	//タグ情報を文字に書き換える
+	if($json){
+		foreach($json['tracks'] as &$info){
+			//tagsの名前を検索する
+			foreach($info['tags'] as &$tagId){
+				foreach($json['tags'] as $tag){
+					if($tag['id'] == $tagId){
+						$tagId = $tag['name'];
+						var_dump($tagId);
+						break;
+					}
+				}
+			}
+		}
+	}
+	return $json;
+}
+
+function getRadioCoTrackInformation(){
 
 	//URLを指定する
 	$url='https://studio.radio.co/login';
@@ -75,16 +96,18 @@ function printRadioCoTrackInformation(){
 	//オプションにURLを設定する
 	curl_setopt($curl,CURLOPT_URL,'https://studio.radio.co/api/v1/stations/s71a30a170/tracks');
 	//文字列で結果を返させる
-	//curl_setopt($curl,CURLOPT_RETURNTRANSFER,true);
+	curl_setopt($curl,CURLOPT_RETURNTRANSFER,true);
 	//クッキーを読み込むファイルを指定
 	curl_setopt($curl,CURLOPT_COOKIEFILE,$cookie);
 	//SSL警告を無視
 	curl_setopt($curl,CURLOPT_SSL_VERIFYPEER, false);
 	//URLにアクセスし、結果を表示させる
-	curl_exec($curl);
+	$json = json_decode(curl_exec($curl),true);
 	//cURLのリソースを解放する
 	curl_close($curl);
 
 	//テンポラリファイルを削除
 	unlink($cookie);
+
+	return $json;
 }
