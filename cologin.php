@@ -1,21 +1,14 @@
 <?php
 
-require 'settings.php';
-
-//Original: http://mio-koduki.blogspot.jp/2012/08/phpcurl-phpcurlgoogle.html
-//TODO: 名前をgetにし、タグから計算した名前・写真や音楽のプレビューに関するデータが入った配列を返すように改善
-
 function parseTrack(){
 	$json = getRadioCoTrackInformation();
-	//タグ情報を文字に書き換える
+	//Change ID to name
 	if($json){
 		foreach($json['tracks'] as &$info){
-			//tagsの名前を検索する
 			foreach($info['tags'] as &$tagId){
 				foreach($json['tags'] as $tag){
 					if($tag['id'] == $tagId){
 						$tagId = $tag['name'];
-						var_dump($tagId);
 						break;
 					}
 				}
@@ -25,88 +18,86 @@ function parseTrack(){
 	return $json;
 }
 
+//Original: http://mio-koduki.blogspot.jp/2012/08/phpcurl-phpcurlgoogle.html
 function getRadioCoTrackInformation(){
 
-	//URLを指定する
+	//URL
 	$url='https://studio.radio.co/login';
-	//POST用のデータを作っておく
+	//POST Data
 	$data=array
 	(
-			//ID部分（適宜置き換え）
 			'_username'=>COUSER,
-			//パスワード部分（適宜置き換え）
 			'_password'=>COPASS,
-			//ログインを維持するかのチェックボックス部分
 			//'_remember_me'=>'on',
 	);
-	//テンポラリファイルを作成する
+	//Create temp file
 	$cookie=tempnam(sys_get_temp_dir(),'cookie_');
-	//cURLを初期化して使用可能にする
+	//Enble cURL
 	$curl=curl_init();
-	//オプションにURLを設定する
+	//Add URL option
 	curl_setopt($curl,CURLOPT_URL,$url);
-	//文字列で結果を返させる
+	//Receive result as a string
 	curl_setopt($curl,CURLOPT_RETURNTRANSFER,true);
-	//クッキーを書き込むファイルを指定
+	//Decide where to store the cookie
 	curl_setopt($curl,CURLOPT_COOKIEJAR,$cookie);
-	//SSL警告を無視
+	//Ignore security warnings (SSL)
 	curl_setopt($curl,CURLOPT_SSL_VERIFYPEER, false);
-	//URLにアクセスし、結果を文字列として返す
+	//Acquire data
 	$html=curl_exec($curl);
-	//cURLのリソースを解放する
+	//Free cURL resources
 	curl_close($curl);
-	//Document初期化
+	//Init Document
 	$dom=new DOMDocument();
-	//html文字列を読み込む（htmlに誤りがある場合エラーが出るので@をつける）
+	//Read HTML strings
 	$dom->loadHTML($html);
-	//XPath初期化
+	//Init XPath
 	$xpath=new DOMXPath($dom);
-	//inputのtypeがhiddenの要素をとってくる
+	//Find hidden elements from html
 	$node=$xpath->query('//input[@type="hidden"]');
 	foreach($node as $v)
 	{
-		//POST用のデータに追加する
+		//Add this elements to the POST request
 		$data[$v->getAttribute('name')]=$v->getAttribute('value');
 	}
-	//cURLを初期化して使用可能にする
+	//Enble cURL
 	$curl=curl_init();
-	//オプションにURLを設定する
+	//Add URL option
 	curl_setopt($curl,CURLOPT_URL,'https://studio.radio.co/login_check');
-	//メソッドをPOSTに設定
+	//Set method to POST
 	curl_setopt ($curl,CURLOPT_POST,true);
-	//文字列で結果を返させる
+	//Receive result as a string
 	curl_setopt($curl,CURLOPT_RETURNTRANSFER,true);
-	//POSTデータ設定
+	//Set POST data
 	curl_setopt($curl,CURLOPT_POSTFIELDS,$data);
-	//クッキーを読み込むファイルを指定
+	//Decide where to read the cookie
 	curl_setopt($curl,CURLOPT_COOKIEFILE,$cookie);
-	//クッキーを書き込むファイルを指定
+	//Decide where to store the cookie
 	curl_setopt($curl,CURLOPT_COOKIEJAR,$cookie);
-	//Locationをたどる
+	//Follow Location
 	curl_setopt($curl,CURLOPT_FOLLOWLOCATION,true);
-	//SSL警告を無視
+	//Ignore security warnings (SSL)
 	curl_setopt($curl,CURLOPT_SSL_VERIFYPEER, false);
-	//URLにアクセスし、結果を表示させる
+	//Acquire data
 	curl_exec($curl);
-	//cURLのリソースを解放する
+	//Free cURL resources
 	curl_close($curl);
 
-	//cURLを初期化して使用可能にする
+	//Enble cURL
 	$curl=curl_init();
-	//オプションにURLを設定する
+	//Add URL option
 	curl_setopt($curl,CURLOPT_URL,'https://studio.radio.co/api/v1/stations/s71a30a170/tracks');
-	//文字列で結果を返させる
+	//Receive result as a string
 	curl_setopt($curl,CURLOPT_RETURNTRANSFER,true);
-	//クッキーを読み込むファイルを指定
+	//Decide where to read the cookie
 	curl_setopt($curl,CURLOPT_COOKIEFILE,$cookie);
-	//SSL警告を無視
+	//Ignore security warnings (SSL)
 	curl_setopt($curl,CURLOPT_SSL_VERIFYPEER, false);
-	//URLにアクセスし、結果を表示させる
+	//Acquire data
 	$json = json_decode(curl_exec($curl),true);
-	//cURLのリソースを解放する
+	//Free cURL resources
 	curl_close($curl);
 
-	//テンポラリファイルを削除
+	//Delete temp file
 	unlink($cookie);
 
 	return $json;
