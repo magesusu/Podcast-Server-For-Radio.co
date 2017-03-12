@@ -4,7 +4,7 @@
 class FtpTransmission {
 	private $conn;
 
-	//接続処理
+	//Connection process
 	function connect($host, $user, $pass, $port=21, $timeout=90){
 		try {
 			$this->conn = ftp_connect($host, $port, $timeout);
@@ -21,17 +21,17 @@ class FtpTransmission {
 		return true;
 	}
 
-	//終了処理
+	//Disconnection process
 	function close(){
 		return ftp_close($this->conn);
 	}
 
-	//PASVモード
+	//PASV Mode
 	function set_pasv($mode=true){
 		return ftp_pasv($this->conn, $mode);
 	}
 
-	//アップロード
+	//Upload
 	function upload($file, $to, $mode='auto'){
 		if($mode == 'auto') $mode = $this->detect_mode($file);
 		$to = (preg_match('/(\\\\|\/)$/', $to)) ? $to . basename($file) : $to . '/' . basename($file);
@@ -39,7 +39,7 @@ class FtpTransmission {
 		return $result;
 	}
 
-	//ダウンロード
+	//Download
 	function download($file, $to, $mode='auto'){
 		if($mode == 'auto') $mode = $this->detect_mode($file);
 		$to = (preg_match('/(\\\\|\/)$/', $to)) ? $to . basename($file) : $to . '/' . basename($file);
@@ -47,13 +47,13 @@ class FtpTransmission {
 		return $result;
 	}
 
-	//ファイル一覧を表示
+	//Show File list (Simple)
 	function nlist($dir){
 		return ftp_nlist($this->conn, $dir);
 	}
 
 
-	//詳細なファイル一欄を表示
+	//Show File list (With extra information)
 	function rawlist($dir, $win=false){
 		$list = array();
 		$raw = ftp_rawlist($this->conn, $dir);
@@ -104,27 +104,27 @@ class FtpTransmission {
 		return ftp_pwd($this->conn);
 	}
 
-	//ファイル削除
+	//Delete File
 	function delete_file($file){
 		return ftp_delete($this->conn, $file);
 	}
 
-	//フォルダ作成
+	//Create folder
 	function make_directory($dir){
 		return ftp_mkdir($this->conn, $dir);
 	}
 
-	//フォルダ削除
+	//Delete folder
 	function remove_directory($dir){
 		return ftp_rmdir($this->conn, $dir);
 	}
 
-	//転送モード検出
+	//Detect transfer mode
 	function detect_mode($file){
 		$pathinfo = pathinfo($file);
 		$extension = isset($pathinfo['extension']) ? strtolower($pathinfo['extension']) : '';
 
-		//ASCIIとして扱うファイル
+		//Extension list transferred in ASCII
 		$ascii = array(
 				'asp', 'cgi', 'css', 'csv', 'html', 'htm', 'ini', 'js', 'jsp',
 				'log', 'php', 'py', 'pl', 'svg', 'tpl', 'txt', 'xml', 'htaccess', ''
