@@ -5,24 +5,23 @@ require "ftp.php";
 require "mp3file.php";
 require 'cologin.php';
 
-//Allow up to one hour of execution
-//ini_set("max_execution_time",3600);
-ini_set("max_execution_time",60);
+//Allow up to 10min of execution
+ini_set("max_execution_time",600);
 echo "*****Podcast Add Tools*****\n";
 
 //Call FTP client
 $ftp = new FtpTransmission();
 
-// //Download files
-// if($ftp->connect(HOST, USER, PASS)){
-// 	$cue = getDownloadList("/",$ftp,SAVEDIR);
-// 	foreach ($cue as $from){
-// 		echo "[DL:Start]".$from."\n";
-// 		$ftp->download($from,SAVEDIR);
-// 		echo "[DL:End]".$from."\n";
-// 	}
-// 	$ftp->close();
-// }
+//Download files
+if($ftp->connect(HOST, USER, PASS)){
+	$cue = getDownloadList("/",$ftp,SAVEDIR);
+	foreach ($cue as $from){
+		echo "[DL:Start]".$from."\n";
+		$ftp->download($from,SAVEDIR);
+		echo "[DL:End]".$from."\n";
+	}
+	$ftp->close();
+}
 
 //Create a podcast list from the files
 static $medialist = [];
@@ -58,6 +57,7 @@ if ($dir = opendir(SAVEDIR)) {
 						$data['filesize'] = filesize($local);
 						$data['duration'] = MP3File::formatTime($info['duration']);
 						$data['artist'] = $info['artist'];
+						$data['album'] = $info['album'];
 						$data['picture'] = $info['artwork']['large_url'];
 						$data['date'] = date("D, d M Y H:i:s O", filemtime($local));
 						$medialist[] = $data;
@@ -96,10 +96,10 @@ file_put_contents(RSSPATH, "<lastBuildDate>".$currentTime->format( "D, d M Y H:i
 foreach($medialist as $info){
 	echo "[PUT]".htmlspecialchars($info['title'])."\n";
 	file_put_contents(RSSPATH, "\t<item>\n", FILE_APPEND | LOCK_EX);
-	file_put_contents(RSSPATH, "\t\t<title>".htmlspecialchars($info['title'])."</title>\n", FILE_APPEND | LOCK_EX);
-	file_put_contents(RSSPATH, "\t\t<description>".htmlspecialchars($info['artist'])."</description>\n", FILE_APPEND | LOCK_EX);
-	file_put_contents(RSSPATH, "\t\t<itunes:subtitle>".htmlspecialchars($info['title'])." - ".htmlspecialchars($info['artist'])."</itunes:subtitle>\n", FILE_APPEND | LOCK_EX);
-	file_put_contents(RSSPATH, "\t\t<itunes:summary>".htmlspecialchars($info['title'])." - ".htmlspecialchars($info['artist'])."</itunes:summary>\n", FILE_APPEND | LOCK_EX);
+	file_put_contents(RSSPATH, "\t\t<title>".titleEscape($info['title'])."</title>\n", FILE_APPEND | LOCK_EX);
+	file_put_contents(RSSPATH, "\t\t<description>".titleEscape($info['album'])." - ".titleEscape($info['artist'])."</description>\n", FILE_APPEND | LOCK_EX);
+	file_put_contents(RSSPATH, "\t\t<itunes:subtitle>".titleEscape($info['album'])."</itunes:subtitle>\n", FILE_APPEND | LOCK_EX);
+	file_put_contents(RSSPATH, "\t\t<itunes:summary>".titleEscape($info['album'])." - ".titleEscape($info['artist'])."</itunes:summary>\n", FILE_APPEND | LOCK_EX);
 	file_put_contents(RSSPATH, "\t\t<itunes:image href='".htmlspecialchars($info['picture'])."' />\n", FILE_APPEND | LOCK_EX);
 	file_put_contents(RSSPATH, "\t\t<itunes:duration>".htmlspecialchars($info['duration'])."</itunes:duration>\n", FILE_APPEND | LOCK_EX);
 	file_put_contents(RSSPATH, "\t\t<pubDate>".htmlspecialchars($info['date'])."</pubDate>\n", FILE_APPEND | LOCK_EX);
@@ -110,7 +110,9 @@ foreach($medialist as $info){
 }
 file_put_contents(RSSPATH, $foot, FILE_APPEND | LOCK_EX);
 
-
+function titleEscape($title){
+	return str_replace("&amp;", "＆", htmlspecialchars($title));
+}
 function getDJCode($title){
 	$member = 0;
 	if(stripos($title,'steve') !== false){
